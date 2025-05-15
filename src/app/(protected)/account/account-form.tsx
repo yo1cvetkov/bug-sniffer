@@ -82,7 +82,7 @@ export default function AccountForm({ user }: { user: User | null }) {
   }
 
   return (
-    <div className='form-widget'>
+    <div className='mx-auto w-[300px] h-screen flex flex-col justify-center'>
       <Avatar
         uid={user?.id ?? null}
         url={avatarUrl}

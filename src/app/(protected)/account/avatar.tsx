@@ -72,14 +72,16 @@ export default function Avatar({ uid, url, size, onUpload }: AvatarProps) {
   return (
     <div>
       {avatarUrl ? (
-        <Image
-          width={size}
-          height={size}
-          src={avatarUrl}
-          alt='Avatar'
-          className='avatar-image'
-          style={{ height: size, width: size }}
-        />
+        <div>
+          <Image
+            width={size}
+            height={size}
+            src={avatarUrl}
+            alt='Avatar'
+            className='avatar-image'
+            style={{ height: size, width: size }}
+          />
+        </div>
       ) : (
         <div style={{ height: size, width: size }}>No avatar</div>
       )}
