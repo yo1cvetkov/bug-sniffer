@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from 'react';
 
 import { createClient } from '@/utils/supabase/client';
 import { type User } from '@supabase/supabase-js';
+import Avatar from './avatar';
 
 export default function AccountForm({ user }: { user: User | null }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -82,7 +83,15 @@ export default function AccountForm({ user }: { user: User | null }) {
 
   return (
     <div className='form-widget'>
-      {/* ... */}
+      <Avatar
+        uid={user?.id ?? null}
+        url={avatarUrl}
+        size={150}
+        onUpload={(url) => {
+          setAvatarUrl(url);
+          updateProfile({ fullName, username, website, avatarUrl: url });
+        }}
+      />
       <div>
         <label htmlFor='email'>Email</label>
         <input id='email' type='text' value={user?.email} disabled />
