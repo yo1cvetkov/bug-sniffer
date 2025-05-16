@@ -5,6 +5,11 @@ import { useCallback, useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { type User } from '@supabase/supabase-js';
 import Avatar from './avatar';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { LoaderCircle, LogOutIcon, SaveIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AccountForm({ user }: { user: User | null }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -73,72 +78,92 @@ export default function AccountForm({ user }: { user: User | null }) {
 
       if (error) throw error;
 
-      alert('Profile updated.');
+      toast.success('Profile updated.');
     } catch {
-      alert('Error updating profile');
+      toast.error('Error updating profile');
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className='mx-auto w-[300px] h-screen flex flex-col justify-center'>
+    <div className='mx-auto w-[400px] h-screen flex flex-col justify-center'>
       <Avatar
         uid={user?.id ?? null}
         url={avatarUrl}
-        size={150}
+        size={400}
         onUpload={(url) => {
           setAvatarUrl(url);
           updateProfile({ fullName, username, website, avatarUrl: url });
         }}
       />
-      <div>
-        <label htmlFor='email'>Email</label>
-        <input id='email' type='text' value={user?.email} disabled />
+      <div className='grid grid-cols-[70px_1fr] items-center gap-x-6 mt-6'>
+        <Label htmlFor='email' className='text-xs'>
+          Email
+        </Label>
+        <Input
+          id='email'
+          type='text'
+          value={user?.email}
+          disabled
+          className='disabled:cursor-not-allowed'
+        />
       </div>
-      <div>
-        <label htmlFor='fullName'>Full Name</label>
-        <input
+      <div className='grid grid-cols-[70px_1fr] items-center gap-x-6 mt-4'>
+        <Label htmlFor='fullName' className='text-xs shrink-0'>
+          Full Name
+        </Label>
+        <Input
           id='fullName'
           type='text'
           value={fullName || ''}
           onChange={(e) => setFullName(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor='username'>Username</label>
-        <input
+      <div className='grid grid-cols-[70px_1fr] items-center gap-x-6 mt-4'>
+        <Label htmlFor='username' className='text-xs shrink-0'>
+          Username
+        </Label>
+        <Input
           id='username'
           type='text'
           value={username || ''}
           onChange={(e) => setUsername(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor='website'>Website</label>
-        <input
+      <div className='grid grid-cols-[70px_1fr] items-center gap-x-6 mt-4'>
+        <Label htmlFor='website' className='text-xs shrink-0'>
+          Website
+        </Label>
+        <Input
           id='website'
           type='url'
           value={website || ''}
           onChange={(e) => setWebsite(e.target.value)}
         />
       </div>
-      <div>
-        <button
-          className='button primary block'
+      <div className='mt-4'>
+        <Button
           onClick={() =>
             updateProfile({ fullName, username, website, avatarUrl })
           }
           disabled={isLoading}
+          className='w-full'
         >
-          {isLoading ? 'Loading ...' : 'Update'}
-        </button>
+          {isLoading ? (
+            <LoaderCircle className='w-3 h-3 animate-spin' />
+          ) : (
+            <SaveIcon className='w-3 h-3' />
+          )}
+          {isLoading ? 'Loading...' : 'Save changes'}
+        </Button>
       </div>
       <div>
         <form action='/auth/signout' method='post'>
-          <button className='button block' type='submit'>
+          <Button variant={'ghost'} className='w-full mt-6' type='submit'>
+            <LogOutIcon className='w-3 h-3' />
             Sign out
-          </button>
+          </Button>
         </form>
       </div>
     </div>

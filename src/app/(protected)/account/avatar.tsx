@@ -1,8 +1,15 @@
 'use client';
 
 import { createClient } from '@/utils/supabase/client';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Avatar as AvatarComponent,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { LoaderCircle, UploadIcon } from 'lucide-react';
 
 interface AvatarProps {
   uid: string | null;
@@ -11,11 +18,13 @@ interface AvatarProps {
   onUpload: (url: string) => void;
 }
 
-export default function Avatar({ uid, url, size, onUpload }: AvatarProps) {
+export default function Avatar({ uid, url, onUpload }: AvatarProps) {
   const supabase = createClient();
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  const uploadRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     async function downloadImage(path: string) {
@@ -69,27 +78,41 @@ export default function Avatar({ uid, url, size, onUpload }: AvatarProps) {
     }
   };
 
+  const uploadButtonText = isUploading
+    ? 'Uploading...'
+    : avatarUrl
+    ? 'Change avatar'
+    : 'Upload avatar';
+
   return (
-    <div>
-      {avatarUrl ? (
-        <div>
-          <Image
-            width={size}
-            height={size}
-            src={avatarUrl}
-            alt='Avatar'
-            className='avatar-image'
-            style={{ height: size, width: size }}
-          />
-        </div>
-      ) : (
-        <div style={{ height: size, width: size }}>No avatar</div>
-      )}
-      <div style={{ width: size }}>
-        <label className='block' htmlFor='single'>
-          {isUploading ? 'Uploading...' : 'Upload'}
-        </label>
+    <div className='flex flex-col items-center gap-y-4'>
+      <AvatarComponent className={cn(`w-20 h-20`)}>
+        <AvatarImage
+          src={avatarUrl as string}
+          alt='User avatar'
+          className='object-cover object-top'
+        />
+        <AvatarFallback>BS</AvatarFallback>
+      </AvatarComponent>
+
+      <div>
+        <Button
+          onClick={() => {
+            uploadRef.current?.click();
+          }}
+          variant={'outline'}
+          size={'sm'}
+          className='text-xs'
+        >
+          {isUploading ? (
+            <LoaderCircle className='w-3 h-3 animate-spin' />
+          ) : (
+            <UploadIcon className='w-3 h-3' />
+          )}
+          {uploadButtonText}
+        </Button>
         <input
+          ref={uploadRef}
           style={{ visibility: 'hidden', position: 'absolute' }}
           type='file'
           accept='image/*'
