@@ -69,19 +69,21 @@ export default function Chat() {
   };
 
   return (
-    <div className='flex flex-col gap-4'>
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        rows={10}
-        cols={50}
-        className='border rounded-md p-4'
-      />
-      <Button onClick={handleSubmit}>Send</Button>
-      <div className='prose max-w-none dark:prose-invert'>
+    <div className='flex relative max-h-screen flex-col py-4'>
+      <div className='max-w-none h-full overflow-y-auto py-4'>
         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
           {response}
         </ReactMarkdown>
+      </div>
+      <div className='flex flex-col border-t gap-y-4 w-full  bg-white'>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={3}
+          cols={50}
+          className='border rounded-md p-4 mt-4'
+        />
+        <Button onClick={handleSubmit}>Send</Button>
       </div>
     </div>
   );
