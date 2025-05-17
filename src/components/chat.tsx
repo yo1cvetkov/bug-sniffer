@@ -2,17 +2,26 @@
 
 import { useState } from 'react';
 import { Button } from './ui/button';
+import useCodeStore from '@/stores/code-store';
+import { toast } from 'sonner';
 
 export default function Chat() {
   const [message, setMessage] = useState<string>('');
   const [response, setResponse] = useState<string>('');
 
+  const { code } = useCodeStore();
+
   const handleSubmit = async () => {
+    if (!code) {
+      toast.error('Some code must be provided');
+      return;
+    }
+
     setResponse('');
 
     const res = await fetch('/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, code }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -37,7 +46,9 @@ export default function Chat() {
 
           setResponse((prev) => prev + (json.message?.content || ''));
         }
-      } catch {}
+      } catch {
+        alert('Some parsing error occurred');
+      }
     }
   };
 
