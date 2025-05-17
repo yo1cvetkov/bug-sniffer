@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import useCodeStore from '@/stores/code-store';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 export default function Chat() {
   const [message, setMessage] = useState<string>('');
@@ -19,36 +22,49 @@ export default function Chat() {
 
     setResponse('');
 
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      body: JSON.stringify({ message, code }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message, code }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const reader = res.body?.getReader();
+      if (!res.ok) {
+        throw new Error('Failed to get the response! HTTP error');
+      }
 
-    const decoder = new TextDecoder();
+      const reader = res.body?.getReader();
 
-    while (true) {
-      const { done, value } = await reader!.read();
+      const decoder = new TextDecoder();
 
-      if (done) break;
+      while (true) {
+        const { done, value } = await reader!.read();
 
-      const chunk = decoder.decode(value);
+        if (done) break;
 
-      try {
+        const chunk = decoder.decode(value);
         const lines = chunk.split('\n').filter(Boolean);
 
         for (const line of lines) {
-          const json = JSON.parse(line);
+          if (line.startsWith('data: ')) {
+            try {
+              const json = JSON.parse(line.slice(6));
 
-          setResponse((prev) => prev + (json.message?.content || ''));
+              if (json.message?.content) {
+                setResponse((prev) => prev + json.message.content);
+              }
+            } catch {
+              alert('Some parsing error occurred');
+              console.error('Problematic line:', line);
+            }
+          }
         }
-      } catch {
-        alert('Some parsing error occurred');
       }
+    } catch (error) {
+      console.error('Failed to parse JSON: ', error);
+      toast.error('Failed to get the response');
     }
   };
 
@@ -62,7 +78,11 @@ export default function Chat() {
         className='border rounded-md p-4'
       />
       <Button onClick={handleSubmit}>Send</Button>
-      <div className='whitespace-pre-wrap mt-4'>{response}</div>
+      <div className='prose max-w-none dark:prose-invert'>
+        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+          {response}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }

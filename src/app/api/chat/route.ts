@@ -24,26 +24,60 @@ export async function POST(req: NextRequest) {
   The response should be structured as the line of the code followed by the explanation for the problem and the solution.
   `;
 
-  const ollamaResponse = await fetch('http://localhost:11434/api/chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama3',
-      stream: true,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    }),
-  });
+  try {
+    const ollamaResponse = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama3',
+        stream: true,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      }),
+    });
 
-  return new NextResponse(ollamaResponse.body, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-    },
-  });
+    if (!ollamaResponse.ok) {
+      throw new Error(`Ollama API error: ${ollamaResponse.statusText}`);
+    }
+
+    const transformStream = new TransformStream({
+      transform(chunk, controller) {
+        const text = new TextDecoder().decode(chunk);
+        const lines = text.split('\n').filter(Boolean);
+
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line);
+            if (json.message?.content) {
+              controller.enqueue(
+                new TextEncoder().encode(`data: ${JSON.stringify(json)}\n\n`)
+              );
+            }
+          } catch (e) {
+            console.error('Error parsing Ollama response: ', e);
+          }
+        }
+      },
+    });
+
+    return new NextResponse(ollamaResponse.body?.pipeThrough(transformStream), {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: 'Something went wrong' },
+      { status: 500 }
+    );
+  }
 }
