@@ -69,8 +69,8 @@ export default function Chat() {
   };
 
   return (
-    <div className='flex relative max-h-screen flex-col py-4'>
-      <div className='max-w-none h-full overflow-y-auto py-4'>
+    <div className='flex w-full relative max-h-screen flex-col'>
+      <div className='h-full overflow-y-auto py-4'>
         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
           {response}
         </ReactMarkdown>
@@ -81,7 +81,7 @@ export default function Chat() {
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
           cols={50}
-          className='border rounded-md p-4 mt-4'
+          className='border resize-none rounded-md p-4 mt-4'
         />
         <Button onClick={handleSubmit}>Send</Button>
       </div>
