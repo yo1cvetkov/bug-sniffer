@@ -12,7 +12,7 @@ export default function Chat() {
   const [message, setMessage] = useState<string>('');
   const [response, setResponse] = useState<string>('');
 
-  const { code } = useCodeStore();
+  const { code, language, action, priority } = useCodeStore();
 
   const handleSubmit = async () => {
     if (!code) {
@@ -25,7 +25,7 @@ export default function Chat() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({ message, code }),
+        body: JSON.stringify({ message, code, language, action, priority }),
         headers: {
           'Content-Type': 'application/json',
         },

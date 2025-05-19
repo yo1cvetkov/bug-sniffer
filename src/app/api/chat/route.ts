@@ -11,12 +11,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Code is required' }, { status: 400 });
   }
 
+  if (!body.action) {
+    return NextResponse.json({ error: 'Action is required' }, { status: 400 });
+  }
+
+  if (!body.priority) {
+    return NextResponse.json(
+      { error: 'Priority is required' },
+      { status: 400 }
+    );
+  }
+
+  if (!body.language) {
+    return NextResponse.json(
+      { error: 'Language is required' },
+      { status: 400 }
+    );
+  }
+
+  console.log(body.priority);
+
   const prompt = `
   You are a helpful assistant that can help with code.
   You are given a code and a message.
   You need to help the user with the code.
+  You should ${body.action} the code with the focus on ${body.priority} and nothing else than that.
   The code is:
   ${body.code}
+  The language is:
+  ${body.language}
   The message is:
   ${body.message}
 

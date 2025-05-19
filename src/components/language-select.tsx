@@ -17,7 +17,7 @@ export default function LanguageSelect() {
       value={language}
       onValueChange={(value) => setLanguage(value as Language)}
     >
-      <SelectTrigger className='text-xs mb-4'>
+      <SelectTrigger className='text-xs'>
         <SelectValue placeholder='Select a language' className='text-xs' />
       </SelectTrigger>
       <SelectContent>
